@@ -1,9 +1,21 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {wrapper} from '../components/store'
+import {wrapper} from '../components/store';
+
+import Link from 'next/link';
+
+import {
+  Layout,
+} from 'antd';
+
+const {
+  Header, Content,
+} = Layout;
+
+import AppHeader from './atoms/Header';
 
 
-class Page extends Component {
+class Home extends Component {
   constructor(props, tick, custom) {
     super(props);
 
@@ -15,18 +27,19 @@ class Page extends Component {
 
   static getInitialProps({store, isServer, pathname, query}) {
     // Example TICK redux
-    store.dispatch({type: 'TICK', payload: 'This is redux tick'});
+    // store.dispatch({type: 'TICK', payload: 'This is redux tick'});
     return {custom: 'custom'};
   }
 
   render() {
     return (
-      <div>
-        <div>Prop from Redux {this.props.tick}</div>
-        <div>Prop from getInitialProps {this.props.custom}</div>
-      </div>
+      <Layout style={{
+        padding: 50
+        }}>
+        <AppHeader />
+      </Layout>
     )
   }
 }
 
-export default connect(state => state)(Page);
+export default connect(state => state)(Home);
