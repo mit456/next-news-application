@@ -94,43 +94,6 @@ class NewsComponent extends Component {
     })
   }
 
-  /*
-   * Fetch top news associated to a particular
-   * domain
-   */
-  async fetchTopNews(page, language) {
-    try {
-      let queryDomain = this.router.query.domain;
-      let qtopnewsDomain = null;
-
-      for(let i = 0; i < config.domains.length; i++) {
-        let domainObj = config.domains[i];
-
-        if(domainObj.key === queryDomain) {
-          qtopnewsDomain = domainObj.qtopnews
-        } else {
-          continue;
-        }
-      }
-
-      console.log("qtopnews", qtopnewsDomain)
-
-      // Build external API url for newsapi
-      let extapiUrl = 'https://newsapi.org/v2/top-headlines?sources=' +
-      qtopnewsDomain +
-      '&pageSize=5' +
-      '&page=' + page +
-      '&language=' + language +
-      '&apiKey=' + config.apiKey;
-
-      console.log("final API", extapiUrl)
-
-      const resp = await axios.get(extapiUrl)
-      return resp.data
-    } catch(error) {
-      console.log("Try catch error in fetching news", error.stack)
-    }
-  }
 
   /*
    * Fetch all news of a particular
@@ -158,9 +121,46 @@ class NewsComponent extends Component {
       '&language=' + language +
       '&apiKey=' + config.apiKey;
 
-      const resp = await axios.get(extapiUrl)
-      return resp.data
+      const resp = await fetch(extapiUrl)
+      const data = await resp.json()
+      // console.log("Response using fetch", data)
+      return data
     } catch (error) {
+      console.log("Try catch error in fetching news", error.stack)
+    }
+  }
+
+  /*
+   * Fetch top news associated to a particular
+   * domain
+   */
+  async fetchTopNews(page, language) {
+    try {
+      let queryDomain = this.router.query.domain;
+      let qtopnewsDomain = null;
+
+      for(let i = 0; i < config.domains.length; i++) {
+        let domainObj = config.domains[i];
+
+        if(domainObj.key === queryDomain) {
+          qtopnewsDomain = domainObj.qtopnews
+        } else {
+          continue;
+        }
+      }
+
+      // Build external API url for newsapi
+      let extapiUrl = 'https://newsapi.org/v2/top-headlines?sources=' +
+      qtopnewsDomain +
+      '&pageSize=5' +
+      '&page=' + page +
+      '&language=' + language +
+      '&apiKey=' + config.apiKey;
+
+      const resp = await fetch(extapiUrl)
+      const data = await resp.json()
+      return data
+    } catch(error) {
       console.log("Try catch error in fetching news", error.stack)
     }
   }
