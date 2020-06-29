@@ -9,8 +9,6 @@ import {wrapper} from '../../components/store';
 import {useRouter} from 'next/router';
 import InfiniteScroll from 'react-infinite-scroller';
 
-import axios from 'axios';
-
 import {
   Layout,
   List,
