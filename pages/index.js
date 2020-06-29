@@ -2,8 +2,6 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import {wrapper} from '../components/store';
 
-import Link from 'next/link';
-
 import {
   Layout,
 } from 'antd';
@@ -34,7 +32,8 @@ class Home extends Component {
   render() {
     return (
       <Layout style={{
-        padding: 50
+        padding: 50,
+        background: '#ffffff'
         }}>
         <AppHeader />
       </Layout>

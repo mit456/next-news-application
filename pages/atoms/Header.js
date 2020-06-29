@@ -1,11 +1,13 @@
 /*
- * This is header, created as an atom
+ * AppHeader,
+ * created as an atom
  * to make it reusable
 */
 
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {wrapper} from '../../components/store';
+import { useRouter } from 'next/router';
 
 import {
   MailOutlined,
@@ -26,35 +28,53 @@ const {
   SubMenu
 } = Menu;
 
-class AppHeader extends Component {
+class HeaderComponent extends Component {
   constructor(props) {
     super(props)
 
+    this.router = (props && props.router)
+      ? props.router : {}
+
     this.state = {
-      current: 'mail'
+      current: 'tech',
     }
+
+    this.handleClick = this.handleClick.bind(this)
   }
 
   handleClick = e => {
+    console.log("**** handle click", e.key)
+
+    let href = "/news/" + e.key;
+    this.router.push(href)
+
     this.setState({
       current: e.key
     })
   }
 
-
   render() {
     const { current } = this.state;
     return (
-      <Header>
-        <Menu onClick={this.handleClick}
+      <Header style={{
+        background: "#ffffff"
+        }}>
+        <Menu
           selectedKeys={[current]}
           mode="horizontal">
 
-          <Menu.Item key="mail" icon={<MailOutlined />}>
-            Technology News
+          <Menu.Item
+            key="techcrunch.com"
+            icon={<MailOutlined />}
+            onClick={this.handleClick}>
+            TechCrunch
           </Menu.Item>
-          <Menu.Item key="app" disabled icon={<AppstoreOutlined />}>
-            Blockchain News
+
+          <Menu.Item
+            key="thenextweb.com"
+            icon={<AppstoreOutlined />}
+            onClick={this.handleClick}>
+            The Next Web
           </Menu.Item>
 
           {/*
@@ -79,6 +99,13 @@ class AppHeader extends Component {
       </Header>
     );
   }
+}
+
+const AppHeader = (props) => {
+  // Passing router as props to
+  // the class component
+  const router = useRouter()
+  return <HeaderComponent {...props} router={router} />
 }
 
 export default AppHeader;

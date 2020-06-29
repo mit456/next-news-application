@@ -3,7 +3,7 @@ import {createWrapper, HYDRATE} from 'next-redux-wrapper';
 
 
 const astate = {
-  tick: 'Something'
+  tick: 'Something',
 }
 // create your reducer
 const reducer = (state = astate, action) => {
