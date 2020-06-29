@@ -9,11 +9,13 @@ const config = {
     {
       name: 'The Next Web',
       key: 'thenextweb',
+      qtopnews: 'the-next-web',
       point: 'thenextweb.com'
     },
     {
       name: 'TechCrunch',
       key: 'techcrunch',
+      qtopnews: 'techcrunch',
       point: 'techcrunch.com'
     }
   ]

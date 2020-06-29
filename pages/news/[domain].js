@@ -1,5 +1,6 @@
 /*
- *
+ * This gets invoked for following URLs:
+ * '/news/thenextweb', '/news/techcrunch'
  */
 
 import React, {Component} from "react";
@@ -46,6 +47,15 @@ class NewsComponent extends Component {
         language: 'en',
         isLoading: false,
         hasMore: true
+      },
+
+      topnews: {
+        page: 1,
+        articles: [],
+        totalCount: 5,
+        pageSize: 5,
+        language: 'en',
+        isLoading: false
       }
     }
   }
@@ -58,10 +68,10 @@ class NewsComponent extends Component {
   }
 
   async componentDidMount() {
-    // console.log("Router query here", this.router)
     let tempNews = {...this.state.news}
-    let page = 1; // This is helpful in infinite scroll rendering
+    let temptopNews = {...this.state.topnews}
 
+    // Get news for infinite scroll
     let newsapiResp = await this.fetchNews(tempNews.page, tempNews.language)
     // console.log("News api response", newsapiResp)
 
@@ -72,8 +82,60 @@ class NewsComponent extends Component {
     this.setState({
       news: tempNews
     })
+
+    // Get top news articles from the same provider
+    // and update topNews state
+    //
+    let topNewsapiResp = await this.fetchTopNews(temptopNews.page, temptopNews.language)
+    temptopNews.articles = topNewsapiResp.articles
+
+    this.setState({
+      topnews: temptopNews
+    })
   }
 
+  /*
+   * Fetch top news associated to a particular
+   * domain
+   */
+  async fetchTopNews(page, language) {
+    try {
+      let queryDomain = this.router.query.domain;
+      let qtopnewsDomain = null;
+
+      for(let i = 0; i < config.domains.length; i++) {
+        let domainObj = config.domains[i];
+
+        if(domainObj.key === queryDomain) {
+          qtopnewsDomain = domainObj.qtopnews
+        } else {
+          continue;
+        }
+      }
+
+      console.log("qtopnews", qtopnewsDomain)
+
+      // Build external API url for newsapi
+      let extapiUrl = 'https://newsapi.org/v2/top-headlines?sources=' +
+      qtopnewsDomain +
+      '&pageSize=5' +
+      '&page=' + page +
+      '&language=' + language +
+      '&apiKey=' + config.apiKey;
+
+      console.log("final API", extapiUrl)
+
+      const resp = await axios.get(extapiUrl)
+      return resp.data
+    } catch(error) {
+      console.log("Try catch error in fetching news", error.stack)
+    }
+  }
+
+  /*
+   * Fetch all news of a particular
+   * domain
+   */
   async fetchNews(page, language) {
     try {
       let queryDomain = this.router.query.domain;
@@ -88,7 +150,7 @@ class NewsComponent extends Component {
         }
       }
 
-      // Get endpoint from the query domain
+      // Build external API url for newsapi
       let extapiUrl = 'https://newsapi.org/v2/everything?domains=' +
       domainEndpoint +
       '&pageSize=10' +
@@ -148,7 +210,7 @@ class NewsComponent extends Component {
             justifyContent: 'space-between'
             }}>
 
-            <Col span={15}>
+            <Col span={14}>
               <div className="demo-infinite-container">
                 <InfiniteScroll
                   initialLoad={false}
@@ -180,17 +242,37 @@ class NewsComponent extends Component {
               span={8}
               style={{
                 position: 'fixed',
-                background: '#000',
+                background: '#fff',
                 zIndex: 1,
-                left: '65%',
+                left: '63.3%',
                 top: '16%',
                 right: 0,
-                height: 300
               }}>
+              <div className="top-domain-news">
+                <p>Top News from {this.router.query.domain}</p>
+                <hr />
+                <List
+                  dataSource={this.state.topnews.articles}
+                  renderItem={item => (
+                    <List.Item key={item.id}>
+                      <List.Item.Meta
+                        title={<a href="">{item.title}</a>}
+                        description={item.author}
+                      />
+                    </List.Item>
+                  )}>
+                </List>
+              </div>
             </Col>
           </Row>
         </Content>
         <style jsx>{`
+          .top-domain-news {
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            overflow: auto;
+            padding: 8px 24px;
+          }
           .demo-infinite-container {
             border: 1px solid #e8e8e8;
             border-radius: 4px;
