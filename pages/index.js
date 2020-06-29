@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {wrapper} from '../components/store';
+import { useRouter } from 'next/router';
 
 import {
   Layout,
@@ -13,32 +14,47 @@ const {
 import AppHeader from './atoms/Header';
 
 
-class Home extends Component {
-  constructor(props, tick, custom) {
+class HomeComponent extends Component {
+  constructor(props) {
     super(props);
 
+    this.router = (props && props.router)
+      ? props.router : {}
+
     this.state = {
-      tick: tick,
-      custom: custom
+      page: {
+        isLoading: false
+      }
     }
   }
 
   static getInitialProps({store, isServer, pathname, query}) {
     // Example TICK redux
     // store.dispatch({type: 'TICK', payload: 'This is redux tick'});
-    return {custom: 'custom'};
+    return {};
+  }
+
+  componentDidMount() {
+    console.log("Component did mount called")
+    let href = "/news/thenextweb";
+
+    this.router.push(href);
   }
 
   render() {
     return (
       <Layout style={{
-        padding: 50,
         background: '#ffffff'
         }}>
-        <AppHeader />
+        <AppHeader current={'thenextweb'}/>
       </Layout>
     )
   }
+}
+
+const Home = (props) => {
+  const router = useRouter()
+  return <HomeComponent {...props} router={router} />
 }
 
 export default connect(state => state)(Home);

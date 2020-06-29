@@ -5,8 +5,7 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {wrapper} from '../../components/store';
-import { useRouter } from 'next/router';
-
+import {useRouter} from 'next/router';
 import InfiniteScroll from 'react-infinite-scroller';
 
 import axios from 'axios';
@@ -15,7 +14,9 @@ import {
   Layout,
   List,
   Spin,
-  message
+  message,
+  Row,
+  Col
 } from 'antd';
 
 const {
@@ -35,8 +36,6 @@ class NewsComponent extends Component {
     this.state = {
       page: {
         isLoading: false,
-        hasMore: true,
-        // data: []
       },
 
       news: {
@@ -44,6 +43,9 @@ class NewsComponent extends Component {
         articles: [],
         totalCount: 0,
         pageSize: 10,
+        language: 'en',
+        isLoading: false,
+        hasMore: true
       }
     }
   }
@@ -56,14 +58,12 @@ class NewsComponent extends Component {
   }
 
   async componentDidMount() {
-    console.log("Router query here", this.router)
+    // console.log("Router query here", this.router)
     let tempNews = {...this.state.news}
-
     let page = 1; // This is helpful in infinite scroll rendering
 
-    let newsapiResp = await this.fetchNews(tempNews.page)
-    console.log("News api response", newsapiResp)
-
+    let newsapiResp = await this.fetchNews(tempNews.page, tempNews.language)
+    // console.log("News api response", newsapiResp)
 
     tempNews.articles = newsapiResp.articles
     tempNews.totalCount = newsapiResp.totalCount
@@ -74,12 +74,26 @@ class NewsComponent extends Component {
     })
   }
 
-  async fetchNews(page) {
+  async fetchNews(page, language) {
     try {
+      let queryDomain = this.router.query.domain;
+      let domainEndpoint = null;
+
+      for(let i = 0; i < config.domains.length; i++) {
+        let domainObj = config.domains[i];
+        if (domainObj.key === queryDomain) {
+          domainEndpoint = domainObj.point
+        } else {
+          continue;
+        }
+      }
+
+      // Get endpoint from the query domain
       let extapiUrl = 'https://newsapi.org/v2/everything?domains=' +
-      this.router.query.domain +
+      domainEndpoint +
       '&pageSize=10' +
       '&page=' + page +
+      '&language=' + language +
       '&apiKey=' + config.apiKey;
 
       const resp = await axios.get(extapiUrl)
@@ -91,36 +105,30 @@ class NewsComponent extends Component {
 
   async handleInfiniteOnLoad() {
     let tempNews = {...this.state.news}
-    let tempStatePage = {...this.state.page}
 
-    tempStatePage.isLoading = true
+    tempNews.isLoading = true
     this.setState({
-      page: tempStatePage,
+      news: tempNews,
     });
 
     // Infinite scroll limit
     if (tempNews.articles >= tempNews.totalCount) {
       message.warning('Infinite List loaded all');
 
-      tempStatePage.hasMore = false
-      tempStatePage.isLoading = false
+      tempNews.hasMore = false
+      tempNews.isLoading = false
       this.setState({
-        page: tempStatePage
+        news: tempNews
       });
       return ;
     }
 
-    let newsapiResp = await this.fetchNews(tempNews.page)
-
+    let newsapiResp = await this.fetchNews(tempNews.page, tempNews.language)
     tempNews.articles = tempNews.articles.concat(newsapiResp.articles)
     tempNews.page = tempNews.page + 1
+    tempNews.isLoading = false
     this.setState({
       news: tempNews
-    })
-
-    tempStatePage.isLoading = false
-    this.setState({
-      page: tempStatePage
     })
   };
 
@@ -131,35 +139,56 @@ class NewsComponent extends Component {
         padding: 50,
         background: '#ffffff'
         }}>
-        <AppHeader />
+        <AppHeader current={this.router.query.domain}/>
 
-        <Content>
-          <div className="demo-infinite-container">
-            <InfiniteScroll
-              initialLoad={false}
-              pageStart={0}
-              loadMore={this.handleInfiniteOnLoad.bind(this)}
-              hasMore={!this.state.page.isLoading && this.state.page.hasMore}
-              useWindow={true}>
+        <Content style={{
+          paddingTop: 10,
+          }}>
+          <Row style={{
+            justifyContent: 'space-between'
+            }}>
 
-              <List
-                dataSource={this.state.news.articles}
-                renderItem={item => (
-                  <List.Item key={item.id}>
-                    <List.Item.Meta
-                      title={<a href="">{item.title}</a>}
-                      description={item.author}
-                    />
-                  </List.Item>
-                )}>
-                {this.state.page.isLoading && this.state.page.hasMore && (
-                  <div className="demo-loading-container">
-                    <Spin />
-                  </div>
-                )}
-              </List>
-            </InfiniteScroll>
-          </div>
+            <Col span={15}>
+              <div className="demo-infinite-container">
+                <InfiniteScroll
+                  initialLoad={false}
+                  pageStart={0}
+                  loadMore={this.handleInfiniteOnLoad.bind(this)}
+                  hasMore={!this.state.news.isLoading && this.state.news.hasMore}
+                  useWindow={true}>
+
+                  <List
+                    dataSource={this.state.news.articles}
+                    renderItem={item => (
+                      <List.Item key={item.id}>
+                        <List.Item.Meta
+                          title={<a href="">{item.title}</a>}
+                          description={item.author}
+                        />
+                      </List.Item>
+                    )}>
+                    {this.state.news.isLoading && this.state.news.hasMore && (
+                      <div className="demo-loading-container">
+                        <Spin />
+                      </div>
+                    )}
+                  </List>
+                </InfiniteScroll>
+              </div>
+            </Col>
+            <Col
+              span={8}
+              style={{
+                position: 'fixed',
+                background: '#000',
+                zIndex: 1,
+                left: '65%',
+                top: '16%',
+                right: 0,
+                height: 300
+              }}>
+            </Col>
+          </Row>
         </Content>
         <style jsx>{`
           .demo-infinite-container {

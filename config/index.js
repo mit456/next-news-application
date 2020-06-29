@@ -8,10 +8,12 @@ const config = {
   domains: [
     {
       name: 'The Next Web',
+      key: 'thenextweb',
       point: 'thenextweb.com'
     },
     {
       name: 'TechCrunch',
+      key: 'techcrunch',
       point: 'techcrunch.com'
     }
   ]
