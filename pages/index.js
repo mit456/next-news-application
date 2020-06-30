@@ -1,3 +1,9 @@
+'use strict';
+
+/*
+ * Index/Home page
+ */
+
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {wrapper} from '../components/store';

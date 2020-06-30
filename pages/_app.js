@@ -1,3 +1,6 @@
+/*
+ * Application intialization
+ */
 import React from 'react';
 import { Provider } from "react-redux";
 import {wrapper} from '../components/store';

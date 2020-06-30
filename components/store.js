@@ -1,3 +1,7 @@
+/*
+ * This contains application level state/store
+ * management.
+ */
 import {createStore} from 'redux';
 import {createWrapper, HYDRATE} from 'next-redux-wrapper';
 

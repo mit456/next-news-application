@@ -1,5 +1,6 @@
 /*
- * List of configurations can be included here
+ * List of configurations:
+ * Helpful in adding news providers
  */
 
 const config = {
