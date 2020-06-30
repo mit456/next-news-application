@@ -1,3 +1,13 @@
+/*
+ * This gets loaded in /pages/news
+ *
+ * To be noted /pages/news/ i.e extraSlash in
+ * news loads 404. Please follow below links:
+ *
+ * https://github.com/vercel/next.js/issues/5214
+ * https://github.com/vercel/next.js/pull/13333
+ */
+
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {wrapper} from '../../components/store';

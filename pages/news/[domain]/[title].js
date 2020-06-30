@@ -115,6 +115,8 @@ class NewsDetailComponent extends Component {
     })
   }
 
+
+  // Handle clicks on the items of newlist
   handleClick(item) {
     let titleArr = item.title.split(" ");
     let titleStr = titleArr.join("-");
@@ -126,6 +128,7 @@ class NewsDetailComponent extends Component {
     this.router.push(href);
   }
 
+  // Get source from config
   async getSource() {
     let qDomain = this.router.query.domain;
     let dSource = null;
@@ -142,6 +145,8 @@ class NewsDetailComponent extends Component {
     return dSource;
   }
 
+  // Fetch news detail using qInTitle
+  // params of the newsapi
   async fetchNewsDetail() {
     try {
       let dSource = await this.getSource();
@@ -164,6 +169,7 @@ class NewsDetailComponent extends Component {
     }
   }
 
+  // Fetch related news
   async fetchRelatedNews(page, language) {
     try {
       let dSource = await this.getSource()
