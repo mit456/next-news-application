@@ -36,7 +36,7 @@ class HomeComponent extends Component {
 
   componentDidMount() {
     console.log("Component did mount called")
-    let href = "/news/thenextweb";
+    let href = "/news/thenextweb/";
 
     this.router.push(href);
   }

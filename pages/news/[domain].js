@@ -44,6 +44,7 @@ class NewsComponent extends Component {
         pageSize: 10,
         language: 'en',
         isLoading: false,
+        firstLoading: false,
         hasMore: true
       },
 
@@ -56,6 +57,8 @@ class NewsComponent extends Component {
         isLoading: false
       }
     }
+
+    this.handleClick = this.handleClick.bind(this)
   }
 
   /*
@@ -69,6 +72,16 @@ class NewsComponent extends Component {
     let tempNews = {...this.state.news}
     let temptopNews = {...this.state.topnews}
 
+    tempNews.firstLoading = true
+    this.setState({
+      news: tempNews
+    })
+
+    temptopNews.isLoading = true
+    this.setState({
+      topnews: temptopNews
+    })
+
     // Get news for infinite scroll
     let newsapiResp = await this.fetchNews(tempNews.page, tempNews.language)
     // console.log("News api response", newsapiResp)
@@ -76,6 +89,7 @@ class NewsComponent extends Component {
     tempNews.articles = newsapiResp.articles
     tempNews.totalCount = newsapiResp.totalCount
     tempNews.page = tempNews.page + 1
+    tempNews.firstLoading = false
 
     this.setState({
       news: tempNews
@@ -86,12 +100,28 @@ class NewsComponent extends Component {
     //
     let topNewsapiResp = await this.fetchTopNews(temptopNews.page, temptopNews.language)
     temptopNews.articles = topNewsapiResp.articles
+    temptopNews.isLoading = false
 
     this.setState({
       topnews: temptopNews
     })
   }
 
+  async getSource() {
+    let queryDomain = this.router.query.domain;
+    let dSource = null;
+
+    for(let i = 0; i < config.domains.length; i++) {
+      let domainObj = config.domains[i];
+      if (domainObj.key === queryDomain) {
+        dSource = domainObj.source
+      } else {
+        continue;
+      }
+    }
+
+    return dSource;
+  }
 
   /*
    * Fetch all news of a particular
@@ -99,29 +129,18 @@ class NewsComponent extends Component {
    */
   async fetchNews(page, language) {
     try {
-      let queryDomain = this.router.query.domain;
-      let domainEndpoint = null;
-
-      for(let i = 0; i < config.domains.length; i++) {
-        let domainObj = config.domains[i];
-        if (domainObj.key === queryDomain) {
-          domainEndpoint = domainObj.point
-        } else {
-          continue;
-        }
-      }
+      let dSource = await this.getSource()
 
       // Build external API url for newsapi
-      let extapiUrl = 'https://newsapi.org/v2/everything?domains=' +
-      domainEndpoint +
-      '&pageSize=10' +
-      '&page=' + page +
-      '&language=' + language +
-      '&apiKey=' + config.apiKey;
+      let extapiUrl = 'https://newsapi.org/v2/everything?sources=' +
+        dSource +
+        '&pageSize=10' +
+        '&page=' + page +
+        '&language=' + language +
+        '&apiKey=' + config.apiKey;
 
       const resp = await fetch(extapiUrl)
       const data = await resp.json()
-      // console.log("Response using fetch", data)
       return data
     } catch (error) {
       console.log("Try catch error in fetching news", error.stack)
@@ -134,26 +153,16 @@ class NewsComponent extends Component {
    */
   async fetchTopNews(page, language) {
     try {
-      let queryDomain = this.router.query.domain;
-      let qtopnewsDomain = null;
-
-      for(let i = 0; i < config.domains.length; i++) {
-        let domainObj = config.domains[i];
-
-        if(domainObj.key === queryDomain) {
-          qtopnewsDomain = domainObj.qtopnews
-        } else {
-          continue;
-        }
-      }
+      let dSource = await this.getSource()
 
       // Build external API url for newsapi
-      let extapiUrl = 'https://newsapi.org/v2/top-headlines?sources=' +
-      qtopnewsDomain +
-      '&pageSize=5' +
-      '&page=' + page +
-      '&language=' + language +
-      '&apiKey=' + config.apiKey;
+      let extapiUrl = 'https://newsapi.org/v2/everything?sources=' +
+        dSource +
+        '&pageSize=5' +
+        '&page=' + page +
+        '&sortBy=popularity' +
+        '&language=' + language +
+        '&apiKey=' + config.apiKey;
 
       const resp = await fetch(extapiUrl)
       const data = await resp.json()
@@ -161,6 +170,16 @@ class NewsComponent extends Component {
     } catch(error) {
       console.log("Try catch error in fetching news", error.stack)
     }
+  }
+
+  handleClick(item) {
+    let titleArr = item.title.split(" ")
+    let titleStr = titleArr.join("-")
+
+    let href = "/news/"
+      + this.router.query.domain + "/"
+      + titleStr
+    this.router.push(href)
   }
 
   async handleInfiniteOnLoad() {
@@ -209,7 +228,12 @@ class NewsComponent extends Component {
             }}>
 
             <Col span={14}>
-              <div className="demo-infinite-container">
+              <div className="infinite-container">
+                {this.state.news.firstLoading && (
+                  <div className="loading-container">
+                    <Spin />
+                  </div>
+                )}
                 <InfiniteScroll
                   initialLoad={false}
                   pageStart={0}
@@ -220,15 +244,18 @@ class NewsComponent extends Component {
                   <List
                     dataSource={this.state.news.articles}
                     renderItem={item => (
-                      <List.Item key={item.id}>
+                      <List.Item
+                        key={item.id}
+                        onClick={() => this.handleClick(item)}
+                      >
                         <List.Item.Meta
-                          title={<a href="">{item.title}</a>}
+                          title={<a>{item.title}</a>}
                           description={item.author}
                         />
                       </List.Item>
                     )}>
                     {this.state.news.isLoading && this.state.news.hasMore && (
-                      <div className="demo-loading-container">
+                      <div className="loading-container">
                         <Spin />
                       </div>
                     )}
@@ -247,14 +274,21 @@ class NewsComponent extends Component {
                 right: 0,
               }}>
               <div className="top-domain-news">
+                {this.state.topnews.isLoading&& (
+                  <div className="loading-container">
+                    <Spin />
+                  </div>
+                )}
                 <p>Top News from {this.router.query.domain}</p>
                 <hr />
                 <List
                   dataSource={this.state.topnews.articles}
                   renderItem={item => (
-                    <List.Item key={item.id}>
+                    <List.Item
+                      key={item.id}
+                      onClick={() => this.handleClick(item)}>
                       <List.Item.Meta
-                        title={<a href="">{item.title}</a>}
+                        title={<a>{item.title}</a>}
                         description={item.author}
                       />
                     </List.Item>
@@ -271,13 +305,13 @@ class NewsComponent extends Component {
             overflow: auto;
             padding: 8px 24px;
           }
-          .demo-infinite-container {
+          .infinite-container {
             border: 1px solid #e8e8e8;
             border-radius: 4px;
             overflow: auto;
             padding: 8px 24px;
           }
-          .demo-loading-container {
+          .loading-container {
             position: absolute;
             bottom: 40px;
             width: 100%;
