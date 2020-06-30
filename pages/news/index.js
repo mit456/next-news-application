@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {wrapper} from '../components/store';
+import {wrapper} from '../../components/store';
 import { useRouter } from 'next/router';
 
 import {
@@ -11,10 +11,10 @@ const {
   Header, Content,
 } = Layout;
 
-import AppHeader from './atoms/Header';
+import AppHeader from '../atoms/Header';
 
 
-class HomeComponent extends Component {
+class NewsIndexComponent extends Component {
   constructor(props) {
     super(props);
 
@@ -52,9 +52,9 @@ class HomeComponent extends Component {
   }
 }
 
-const Home = (props) => {
+const NewsIndex = (props) => {
   const router = useRouter()
-  return <HomeComponent {...props} router={router} />
+  return <NewsIndexComponent {...props} router={router} />
 }
 
-export default connect(state => state)(Home);
+export default NewsIndex;

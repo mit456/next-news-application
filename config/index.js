@@ -9,14 +9,26 @@ const config = {
     {
       name: 'The Next Web',
       key: 'thenextweb',
-      qtopnews: 'the-next-web',
+      source: 'the-next-web',
       point: 'thenextweb.com'
     },
     {
       name: 'TechCrunch',
       key: 'techcrunch',
-      qtopnews: 'techcrunch',
+      source: 'techcrunch',
       point: 'techcrunch.com'
+    },
+    {
+      name: 'Mashable',
+      key: 'mashable',
+      source: 'mashable',
+      point: 'mashable.com'
+    },
+    {
+      name: 'CNN News',
+      key: 'cnn',
+      source: 'cnn',
+      point: 'cnn.com'
     }
   ]
 }
